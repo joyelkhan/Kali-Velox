@@ -18,6 +18,7 @@ Why Kali-Velox?
 
 Important safety note
 - This script modifies system files and runs a distribution upgrade. Review the code before running and ensure you have backups.
+- Use --dry-run to preview changes without making them. Default actions are aggressive: changing sources.list, DNS, and running upgrades.
 
 Repository structure
 Kali-Velox/
@@ -28,7 +29,6 @@ Kali-Velox/
 ├── install.sh            # One-click installer
 └── .github/
     └── FUNDING.yml       # Optional sponsorship
-
 
 Quick install
 1. Clone the repository:
@@ -46,22 +46,30 @@ Or run directly (without installing):
    sudo python3 kalivelox.py
 
 Usage details
+- Command-line options (new):
+  --dry-run       Show actions without making changes (strongly recommended for first runs)
+  --no-dns        Do not change DNS settings
+  --mirrors N     Number of fastest mirrors to write (default: 3)
+  --max-workers N Number of concurrent tests (default: 30)
+  --skip-upgrade  Do not run `apt dist-upgrade`
+  --backup-dir    Directory to store backups (optional)
+
 - What it does:
   1. Downloads official mirror list from https://http.kali.org/README.mirrorlist
   2. Performs parallel HEAD checks to measure latency to /kali/dists/kali-rolling/InRelease
-  3. Selects the top 3 responders and writes them to /etc/apt/sources.list (backup saved at /etc/apt/sources.list.velox_backup)
-  4. Writes /etc/resolv.conf with nameserver 8.8.8.8 and 1.1.1.1 (Google & Cloudflare)
-  5. Tries to flush systemd-resolved caches
+  3. Selects the top N responders and writes them to /etc/apt/sources.list (backup saved at /etc/apt/sources.list.velox_backup.TIMESTAMP)
+  4. If systemd-resolved manages DNS, writes a drop-in file in /etc/systemd/resolved.conf.d/ to set DNS; otherwise overwrites /etc/resolv.conf
+  5. Flushes resolver caches if possible
   6. Ensures apt-transport-https is installed
-  7. Runs apt update and apt dist-upgrade -y
+  7. Runs apt update and apt dist-upgrade -y (unless --skip-upgrade)
 
 - Customization / common changes:
-  - To skip DNS changes, run the script in a container or comment out the resolv.conf writing lines.
-  - To use more/fewer mirrors, edit the FASTEST constant in kalivelox.py.
+  - Use --dry-run to preview actions without making system changes.
+  - Use --no-dns to prevent DNS modification.
+  - Adjust --mirrors and --max-workers to control selection behavior.
 
 Contributing
 - Bug reports and pull requests welcome. Keep changes focused on performance, safety, and maintainability.
-- Please sign commits with DCO or add a short note in PRs describing tested scenarios.
 
 License
 This project is licensed under the MIT License. See LICENSE for details.
