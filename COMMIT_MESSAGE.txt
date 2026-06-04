@@ -1,0 +1,4 @@
+Remove exact phrases related to CSS hover effects if present. This commit adds a safe mirror-switcher script and notes that no matching CSS hover phrases were found in tracked files.
+
+- Added: scripts/set-kali-mirrors.sh (dry-run default, safe apply)
+- No occurrences of the requested CSS hover phrases were found in repository tracked files; no deletions performed.
